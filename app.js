@@ -2,6 +2,7 @@ const path = require("path");
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require('cors');
 
 // nc
 const session = require("express-session");
@@ -19,6 +20,17 @@ const OrderItem = require("./models/order-item");
 
 const app = express();
 
+app.use(cors({
+  origin: '*'
+}));
+
+
+// app.use((req,res,next) =>{
+//   res.setHeader('Access-Control-Allow-Origin','*')
+//   res.setHeader('Access-Control-Allow-Method','GET,POST,PATCH,DELETE,PUT')
+//   // res.setHeader('Access-Control-Allow-Headers','Content-type , Authorization')
+//   next()
+// })
 app.set("view engine", "ejs");
 app.set("views", "views");
 
@@ -27,6 +39,8 @@ const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 
 // nc
+
+app.use(express.json())
 app.use(
   session({
     secret: "your-secret-key",
@@ -41,15 +55,6 @@ app.use(
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
-
-// app.use((req, res, next) => {
-//   User.findByPk(1)
-//     .then((user) => {
-//       req.user = user;
-//       next();
-//     })
-//     .catch((err) => console.log(err));
-// });
 
 app.use((req, res, next) => {
   if (!req.session.user) {

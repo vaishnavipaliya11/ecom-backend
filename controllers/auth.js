@@ -1,5 +1,5 @@
 const User = require("../models/user");
-const Cart = require("../models/cart")
+const Cart = require("../models/cart");
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const Session = require("express-session-sequelize")(session.Store);
@@ -28,30 +28,32 @@ exports.postLogin = (req, res, next) => {
 
   User.findOne({ where: { email: email } }).then((user) => {
     if (!user) {
-      return res.redirect("/login");
+      return res.status(409).send("User does not exists.");
     }
+
     bcrypt
       .compare(password, user.password)
       .then((passwordMatched) => {
-
         if (passwordMatched) {
           req.session.isLoggedIn = true;
           req.session.user = user;
           return req.session.save((err) => {
             console.log(err);
-            res.redirect("/");
+            res
+              .status(200)
+              .send({
+                isLoggedIn: req.session.isLoggedIn,
+                user: req.session.user,
+              });
           });
         }
-        res.redirect("/login");
+        res.status(409).send({ error: "Email and password does not match" });
       })
       .catch((err) => {
-        console.log(err);
-        res.redirect("/login");
+        console.log(err, "login err");
+        res.status(500).send({ error: "Something wend wrong" });
       });
   });
-
-  console.log(req.session.isLoggedIn, "req.session.isLoggedIn");
-  // console.log(req.session.user, "req.session");
 };
 
 exports.postLogout = (req, res, next) => {
@@ -83,32 +85,32 @@ exports.postSignup = (req, res, next) => {
   const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
 
-  console.log(email,"email", password,"password");
- 
-  User.findOne({where:{ email: email }})
+  console.log(email, "email", password, "password");
+
+  User.findOne({ where: { email: email } })
     .then((userDoc) => {
       if (userDoc) {
-        return res.redirect("/login");
+        return res.status(409).send({ error: "User already exists" });
       }
       return bcrypt
         .hash(password, 6)
         .then((hashedPassword) => {
-          console.log(hashedPassword,"hashedPassword");
+          console.log(hashedPassword, "hashedPassword");
           return User.create({
             email: req.body.email,
             password: hashedPassword, // Set the hashed password here
           });
-          
+
           // return user.Create({email:email, password:password});
         })
-        .then(newUser => {
+        .then((newUser) => {
           // Create a cart and associate it with the new user
-          return Cart.create().then(newCart => {
+          return Cart.create().then((newCart) => {
             return newUser.setCart(newCart); // Associate cart with user
           });
         })
         .then((result) => {
-          res.redirect("/login");
+          res.send(result);
         });
     })
     .catch((err) => {

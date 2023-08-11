@@ -79,11 +79,7 @@ exports.getProducts = (req, res, next) => {
   req.user
     .getProducts()
     .then(products => {
-      res.render('admin/products', {
-        prods: products,
-        pageTitle: 'Admin Products',
-        path: '/admin/products'
-      });
+      res.send({products})
     })
     .catch(err => console.log(err));
 };
