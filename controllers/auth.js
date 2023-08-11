@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const Cart = require("../models/cart")
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const Session = require("express-session-sequelize")(session.Store);
@@ -24,16 +25,6 @@ exports.postLogin = (req, res, next) => {
   const password = req.body.password;
 
   console.log(email, "email", password, "password");
-
-  // you can add any name eg: we have added isLoggedIn
-
-  // User.findOne({ where: { email: email } })
-  //   .then((user) => {
-  //     req.session.isLoggedIn = true;
-  //     req.session.user = user;
-  //     res.redirect("/");
-  //   })
-  //   .catch((err) => console.log(err, "login err"));
 
   User.findOne({ where: { email: email } }).then((user) => {
     if (!user) {
@@ -109,6 +100,12 @@ exports.postSignup = (req, res, next) => {
           });
           
           // return user.Create({email:email, password:password});
+        })
+        .then(newUser => {
+          // Create a cart and associate it with the new user
+          return Cart.create().then(newCart => {
+            return newUser.setCart(newCart); // Associate cart with user
+          });
         })
         .then((result) => {
           res.redirect("/login");
