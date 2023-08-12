@@ -38,6 +38,7 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 
+const Port = 3001
 // nc
 
 app.use(express.json())
