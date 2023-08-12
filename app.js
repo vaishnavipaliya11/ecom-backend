@@ -57,10 +57,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use((req, res, next) => {
-  if (!req.session.user) {
-    return next();
-  }
-  User.findByPk(req.session.user.id)
+  User.findByPk(2)
     .then(user => {
       req.user = user;
       next();
@@ -87,11 +84,25 @@ Order.belongsToMany(Product, { through: OrderItem });
 sequelize
   // .sync({ force: true })
   .sync()
-  .then(() => {
+  .then(result => {
+    return User.findByPk(2);
+    // console.log(result);
+  })
+  .then(user => {
+    if (!user) {
+      return User.create({  email: 'test1@test.com', password:"t" });
+    }
+    return user;
+  })
+  .then(user => {
+    console.log(user);
+    return user.createCart();
+  })
+  .then(cart => {
     app.listen(3000);
   })
-  .catch((err) => {
-    console.log(err,"user create err in app file");
+  .catch(err => {
+    console.log(err);
   });
 
 

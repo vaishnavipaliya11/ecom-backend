@@ -1,6 +1,6 @@
 module.exports = (req, res, next) => {
-  if (!req.session.isLoggedIn) {
-    return res.status(403).send({error:"User is not authorized "});
-  }
+  // if (!req.session.isLoggedIn) {
+  //   return res.status(403).send({error:"User is not authorized "});
+  // }
   next();
 };

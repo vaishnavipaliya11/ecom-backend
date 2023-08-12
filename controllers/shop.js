@@ -57,11 +57,12 @@ exports.getCart = (req, res, next) => {
       return cart
         .getProducts()
         .then((products) => {
-          res.render("shop/cart", {
-            path: "/cart",
-            pageTitle: "Your Cart",
-            products: products,
-          });
+          // res.render("shop/cart", {
+          //   path: "/cart",
+          //   pageTitle: "Your Cart",
+          //   products: products,
+          // });
+          res.send({ products });
         })
         .catch((err) => console.log(err));
     })
@@ -72,61 +73,40 @@ exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   let fetchedCart;
   let newQuantity = 1;
-
-  console.log("User:", req.user); // Debugging: Check if user is logged in and available
-
   req.user
     .getCart()
     .then((cart) => {
-      if (!cart) {
-        // Create a new cart for the user
-        return req.user.createCart();
-      }
-      return cart;
-    })
-    .then((cart) => {
+      fetchedCart = cart;
       return cart.getProducts({ where: { id: prodId } });
     })
     .then((products) => {
-      res.redirect("/products");
-      // ... rest of your code
+      let product;
+      if (products.length > 0) {
+        product = products[0];
+      }
+
+      if (product) {
+        const oldQuantity = product.cartItem.quantity;
+        newQuantity = oldQuantity + 1;
+        console.log(product, "PRODUCTSSS");
+        // return product;
+
+        res.status(200).send({ success: true });
+      }
+
+      return Product.findByPk(prodId);
     })
-    .catch((err) => console.log(err, "Cart err:"));
+    .then((product) => {
+      return fetchedCart.addProduct(product, {
+        through: { quantity: newQuantity },
+      });
+    })
+    .then((result) => {
+      // console.log(result,"RESULTTTTT");
+      res.send({ result });
+    })
+    .catch((err) => console.log(err));
 };
-
-// exports.postCart = (req, res, next) => {
-//   const prodId = req.body.productId;
-//   let fetchedCart;
-//   let newQuantity = 1;
-//   req.user
-//     .getCart()
-//     .then(cart => {
-//       fetchedCart = cart;
-//       return cart.getProducts({ where: { id: prodId } });
-//     })
-//     .then(products => {
-//       let product;
-//       if (products.length > 0) {
-//         product = products[0];
-//       }
-
-//       if (product) {
-//         const oldQuantity = product.cartItem.quantity;
-//         newQuantity = oldQuantity + 1;
-//         return product;
-//       }
-//       return Product.findByPk(prodId);
-//     })
-//     .then(product => {
-//       return fetchedCart.addProduct(product, {
-//         through: { quantity: newQuantity }
-//       });
-//     })
-//     .then(() => {
-//       res.redirect('/cart');
-//     })
-//     .catch(err => console.log(err));
-// };
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -137,10 +117,10 @@ exports.postCartDeleteProduct = (req, res, next) => {
     })
     .then((products) => {
       const product = products[0];
-      return product.cartItem.destroy();
+      return product?.cartItem?.destroy();
     })
     .then((result) => {
-      res.redirect("/cart");
+      res.send({result});
     })
     .catch((err) => console.log(err));
 };
@@ -160,6 +140,7 @@ exports.postOrder = (req, res, next) => {
           return order.addProducts(
             products.map((product) => {
               product.orderItem = { quantity: product.cartItem.quantity };
+              console.log(product, "PRODUCTTTTT");
               return product;
             })
           );
@@ -172,18 +153,15 @@ exports.postOrder = (req, res, next) => {
     .then((result) => {
       res.redirect("/orders");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => console.log(err, "ERRORRRR"));
 };
 
 exports.getOrders = (req, res, next) => {
   req.user
     .getOrders({ include: ["products"] })
     .then((orders) => {
-      res.render("shop/orders", {
-        path: "/orders",
-        pageTitle: "Your Orders",
-        orders: orders,
-      });
+      console.log(orders, "ORDERSSSS");
+      res.send({ orders });
     })
     .catch((err) => console.log(err));
 };
