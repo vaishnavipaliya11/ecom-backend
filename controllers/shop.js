@@ -3,7 +3,7 @@ const Product = require("../models/product");
 exports.getProducts = (req, res, next) => {
   Product.findAll()
     .then((products) => {
-      res.send({products});
+      res.send({ products });
     })
     .catch((err) => {
       console.log(err);
@@ -31,7 +31,7 @@ exports.getProduct = (req, res, next) => {
 exports.getIndex = (req, res, next) => {
   Product.findAll()
     .then((products) => {
-      res.send({products})
+      res.send({ products });
     })
     .catch((err) => {
       console.log(err);
@@ -45,7 +45,6 @@ exports.getCart = (req, res, next) => {
       return cart
         .getProducts()
         .then((products) => {
-        
           res.send({ products });
         })
         .catch((err) => console.log(err));
@@ -91,23 +90,6 @@ exports.postCart = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
-
-// exports.postCartDeleteProduct = (req, res, next) => {
-//   const prodId = req.body.productId;
-//   req.user
-//     .getCart()
-//     .then((cart) => {
-//       return cart.getProducts({ where: { id: prodId } });
-//     })
-//     .then((products) => {
-//       const product = products[0];
-//       return product?.cartItem?.destroy();
-//     })
-//     .then((result) => {
-//       res.send({ result });
-//     })
-//     .catch((err) => console.log(err));
-// };
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -214,8 +196,6 @@ exports.getFilteredCategories = async (req, res) => {
   }
 };
 
-// get single product
-
 // exports.getSingleProduct = async (req, res) => {
 //   console.log(req.params.id, "getSingleProduct");
 //   try {
@@ -251,4 +231,77 @@ exports.getSingleProduct = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
+};
+
+exports.postWishlist = (req, res, next) => {
+  const prodId = req.body.productId;
+  let fetchedWishlist;
+  req.user
+    .getWishlist()
+    .then((wishlist) => {
+      fetchedWishlist = wishlist;
+      return wishlist.getProducts({ where: { id: prodId } });
+    })
+    .then((products) => {
+      let product;
+      if (products.length > 0) {
+        product = products[0];
+      }
+
+      if (product) {
+        res.send("Already in wishlist");
+      }
+
+      return Product.findByPk(prodId)
+        .then((product) => {
+          console.log(product, "add wishlist prod");
+          return fetchedWishlist.addProduct(product);
+        })
+        .then(() => {
+          // Send a success response after adding to the wishlist
+          res.status(200).send("Added to wishlist");
+        })
+        .catch((err) => console.log(err));
+    })
+    .catch((err) => console.log(err));
+};
+
+exports.getWishlist = (req, res, next) => {
+  req.user
+    .getWishlist()
+    .then((wishlist) => {
+      return wishlist
+        .getProducts()
+        .then((products) => {
+          console.log(products, "getwishlist");
+          res.send({ products });
+        })
+        .catch((err) => console.log(err));
+    })
+    .catch((err) => console.log(err));
+};
+
+exports.wishlistDeleteProduct = (req, res, next) => {
+  const prodId = req.body.productId;
+  req.user
+    .getWishlist()
+    .then((wishlist) => {
+      return wishlist.getProducts({ where: { id: prodId } });
+    })
+    .then((products) => {
+      const product = products[0];
+      const wishlistItem = product?.wishlistItem;
+      if (!wishlistItem) {
+        throw new Error("Product not found in wishlist");
+      } else {
+        return wishlistItem.destroy();
+      }
+    })
+    .then((result) => {
+      res.send({ message: "Deleted Wishlist Product" });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send({ error: "Something went wrong" });
+    });
 };

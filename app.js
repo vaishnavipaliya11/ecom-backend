@@ -18,19 +18,15 @@ const CartItem = require("./models/cart-item");
 const Order = require("./models/order");
 const OrderItem = require("./models/order-item");
 
+const Wishlist= require("./models/wishlist")
+const WishlistItem= require("./models/wishlist-item")
+
 const app = express();
 
 app.use(cors({
   origin: '*'
 }));
 
-
-// app.use((req,res,next) =>{
-//   res.setHeader('Access-Control-Allow-Origin','*')
-//   res.setHeader('Access-Control-Allow-Method','GET,POST,PATCH,DELETE,PUT')
-//   // res.setHeader('Access-Control-Allow-Headers','Content-type , Authorization')
-//   next()
-// })
 app.set("view engine", "ejs");
 app.set("views", "views");
 
@@ -82,6 +78,12 @@ Order.belongsTo(User);
 User.hasMany(Order);
 Order.belongsToMany(Product, { through: OrderItem });
 
+User.hasOne(Wishlist)
+Wishlist.belongsTo(User)
+Wishlist.belongsToMany(Product,{through:WishlistItem})
+Product.belongsToMany(Wishlist, {through:WishlistItem})
+
+
 sequelize
   // .sync({ force: true })
   .sync()
@@ -97,7 +99,8 @@ sequelize
   })
   .then(user => {
     console.log(user);
-    return user.createCart();
+    return Promise.all([user.createCart(), user.createWishlist()])
+    // return user.createCart();
   })
   .then(() => {
     app.listen(process.env.PORT || 3000);
