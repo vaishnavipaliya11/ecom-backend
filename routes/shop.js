@@ -7,6 +7,9 @@ const isAuth = require('../util/is-auth')
 
 const router = express.Router();
 
+router.get('/product/:id', shopController.getSingleProduct);
+router.get('/abcd', shopController.getProducts);
+
 router.get('/', isAuth, shopController.getIndex);
 
 router.get('/products', shopController.getProducts);
@@ -22,5 +25,7 @@ router.post('/cart-delete-item', isAuth, shopController.postCartDeleteProduct);
 router.post('/create-order', isAuth, shopController.postOrder);
 
 router.get('/orders', isAuth, shopController.getOrders);
+
+
 
 module.exports = router;

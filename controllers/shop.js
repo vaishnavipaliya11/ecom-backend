@@ -3,11 +3,7 @@ const Product = require("../models/product");
 exports.getProducts = (req, res, next) => {
   Product.findAll()
     .then((products) => {
-      res.render("shop/product-list", {
-        prods: products,
-        pageTitle: "All Products",
-        path: "/products",
-      });
+      res.send({products});
     })
     .catch((err) => {
       console.log(err);
@@ -16,22 +12,18 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
-  // Product.findAll({ where: { id: prodId } })
-  //   .then(products => {
-  //     res.render('shop/product-detail', {
-  //       product: products[0],
-  //       pageTitle: products[0].title,
-  //       path: '/products'
-  //     });
-  //   })
-  //   .catch(err => console.log(err));
+  console.log(
+    req.params.productId,
+    "req.params.productId from getProduct at shop controller"
+  );
   Product.findByPk(prodId)
     .then((product) => {
-      res.render("shop/product-detail", {
-        product: product,
-        pageTitle: product.title,
-        path: "/products",
-      });
+      console.log(
+        product,
+        "req.params.productId from getProduct at shop controller"
+      );
+      res.setHeader("Content-Type", "application/json");
+      res.send(product);
     })
     .catch((err) => console.log(err));
 };
@@ -39,11 +31,7 @@ exports.getProduct = (req, res, next) => {
 exports.getIndex = (req, res, next) => {
   Product.findAll()
     .then((products) => {
-      res.render("shop/index", {
-        prods: products,
-        pageTitle: "Shop",
-        path: "/",
-      });
+      res.send({products})
     })
     .catch((err) => {
       console.log(err);
@@ -57,11 +45,7 @@ exports.getCart = (req, res, next) => {
       return cart
         .getProducts()
         .then((products) => {
-          // res.render("shop/cart", {
-          //   path: "/cart",
-          //   pageTitle: "Your Cart",
-          //   products: products,
-          // });
+        
           res.send({ products });
         })
         .catch((err) => console.log(err));
@@ -108,6 +92,23 @@ exports.postCart = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
+// exports.postCartDeleteProduct = (req, res, next) => {
+//   const prodId = req.body.productId;
+//   req.user
+//     .getCart()
+//     .then((cart) => {
+//       return cart.getProducts({ where: { id: prodId } });
+//     })
+//     .then((products) => {
+//       const product = products[0];
+//       return product?.cartItem?.destroy();
+//     })
+//     .then((result) => {
+//       res.send({ result });
+//     })
+//     .catch((err) => console.log(err));
+// };
+
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   req.user
@@ -117,12 +118,27 @@ exports.postCartDeleteProduct = (req, res, next) => {
     })
     .then((products) => {
       const product = products[0];
-      return product?.cartItem?.destroy();
+      const cartItem = product?.cartItem;
+      if (!cartItem) {
+        throw new Error("Product not found in cart");
+      }
+
+      // Check the quantity
+      if (cartItem.quantity > 1) {
+        // If quantity is greater than 1, decrement it by 1
+        return cartItem.decrement("quantity", { by: 1 });
+      } else {
+        // If quantity is 1 or less, remove the product from the cart
+        return cartItem.destroy();
+      }
     })
     .then((result) => {
-      res.send({result});
+      res.send({ message: "Quantity decreased by 1" });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send({ error: "Something went wrong" });
+    });
 };
 
 exports.postOrder = (req, res, next) => {
@@ -164,4 +180,75 @@ exports.getOrders = (req, res, next) => {
       res.send({ orders });
     })
     .catch((err) => console.log(err));
+};
+
+// Controller function to filter products by multiple categories
+exports.getFilteredCategories = async (req, res) => {
+  try {
+    // Get the categories from the query parameters
+    const categories = req.query.categories;
+    console.log(req.query.categories, "shop req.query.categories");
+    // Check if categories were provided
+    if (!categories) {
+      return res
+        .status(400)
+        .json({ error: "Please provide one or more categories." });
+    }
+
+    // Split the comma-separated categories into an array
+    const categoryArray = categories.split(",");
+
+    // Use Sequelize's findAll method to filter products by categories
+    const products = await Product.findAll({
+      where: {
+        category: categoryArray,
+      },
+    });
+
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching products." });
+  }
+};
+
+// get single product
+
+// exports.getSingleProduct = async (req, res) => {
+//   console.log(req.params.id, "getSingleProduct");
+//   try {
+//     const productId = req.params.id;
+//     // const product = await Product?.findByPk(productId);
+
+//     Product.findByPk(productId)
+//       .then((product) => {
+//         // if (!product) {
+//         //   return res.status(404).json({ error: "Product not found" });
+//         // }
+//         res.send(product);
+//       })
+//       .catch((err) => console.log(err));
+//     // res.send(product);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+exports.getSingleProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findByPk(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    console.log("getSingleProductgetSingleProduct", product);
+    res.json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };

@@ -16,11 +16,28 @@ const Product = sequelize.define('product', {
   },
   imageUrl: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: true,
   },
   description: {
     type: Sequelize.STRING,
     allowNull: false
+  },
+  videoUrl:{
+    type: Sequelize.STRING,
+    allowNull:true
+  },
+  category:{
+    type: Sequelize.STRING,
+    allowNull:false,
+    defaultValue: 'decor'
+  },
+  highlights:{
+    type:Sequelize.STRING,
+    allowNull:true
+  },
+  rating:{
+    type:Sequelize.DOUBLE,
+    allowNull:true
   }
 });
 
