@@ -1,4 +1,6 @@
 const Product = require("../models/product");
+const Address = require("../models/address");
+const Order = require ("../models/order")
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -128,6 +130,9 @@ exports.postOrder = (req, res, next) => {
   req.user
     .getCart()
     .then((cart) => {
+      if (!cart) {
+        return res.status(400).json({ message: "Cart is empty" });
+      }
       fetchedCart = cart;
       return cart.getProducts();
     })
@@ -162,6 +167,9 @@ exports.getOrders = (req, res, next) => {
       res.send({ orders });
     })
     .catch((err) => console.log(err));
+
+  
+
 };
 
 // Controller function to filter products by multiple categories
@@ -304,4 +312,112 @@ exports.wishlistDeleteProduct = (req, res, next) => {
       console.log(err);
       res.status(500).send({ error: "Something went wrong" });
     });
+};
+
+// address
+
+// Create a new address for a user
+exports.createAddress = async (req, res) => {
+  try {
+    const { street, city, state, postalCode, country, mobileNumber, fullName } =
+      req.body;
+    const userId = req.user.id; // Assuming you have user authentication in place
+
+    const address = await Address.create({
+      street,
+      city,
+      state,
+      postalCode,
+      userId,
+      country,
+      mobileNumber,
+      fullName,
+    });
+
+    res.status(201).json({ address });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Get all addresses of a user
+exports.getAllAddresses = async (req, res) => {
+  try {
+    const userId = req.user.id; // Assuming you have user authentication in place
+    console.log(req.user.id, "req.user.id");
+    const addresses = await Address.findAll({ where: { userId } });
+
+    res.status(200).json(addresses);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Update an address
+exports.updateAddress = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+    const { street, city, state, postalCode, country, mobileNumber, fullName } =
+      req.body;
+
+    const address = await Address.findByPk(addressId);
+
+    if (!address) {
+      return res.status(404).json({ error: "Address not found" });
+    }
+
+    // Update address properties
+    address.street = street;
+    address.city = city;
+    address.state = state;
+    address.postalCode = postalCode;
+    address.country = country;
+    address.mobileNumber = mobileNumber;
+    address.fullName = fullName;
+
+    await address.save();
+
+    res.status(200).json({ address });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Delete an address
+exports.deleteAddress = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+
+    const address = await Address.findByPk(addressId);
+
+    if (!address) {
+      return res.status(404).json({ error: "Address not found" });
+    }
+
+    await address.destroy();
+
+    res.status(204).json("Address Deleted");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getAddressById = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+    const address = await Address.findByPk(addressId);
+
+    if (!address) {
+      return res.status(404).json({ error: "address not found" });
+    }
+    console.log("getAddressById", address);
+    res.json(address);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };

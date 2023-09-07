@@ -21,6 +21,8 @@ const OrderItem = require("./models/order-item");
 const Wishlist= require("./models/wishlist")
 const WishlistItem= require("./models/wishlist-item")
 
+const Address = require("./models/address")
+
 const app = express();
 
 app.use(cors({
@@ -77,12 +79,13 @@ Product.belongsToMany(Cart, { through: CartItem });
 Order.belongsTo(User);
 User.hasMany(Order);
 Order.belongsToMany(Product, { through: OrderItem });
-
+Product.belongsToMany(Order, { through: OrderItem });
 User.hasOne(Wishlist)
 Wishlist.belongsTo(User)
 Wishlist.belongsToMany(Product,{through:WishlistItem})
 Product.belongsToMany(Wishlist, {through:WishlistItem})
 
+User.hasOne(Address)
 
 sequelize
   // .sync({ force: true })

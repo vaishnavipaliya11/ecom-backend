@@ -31,4 +31,16 @@ router.get('/wishlist', isAuth, shopController.getWishlist);
 router.post('/add-wishlist', isAuth, shopController.postWishlist);
 router.post('/delete-wishlist', isAuth, shopController.wishlistDeleteProduct);
 
+router.get('/address', isAuth, shopController.getAllAddresses);
+router.post('/add-address', isAuth, shopController.createAddress);
+
+// Get a specific address by ID
+// router.get('/address/:id', shopController.getAddressById);
+
+// Update a specific address by ID
+router.put('/address/:id', shopController.updateAddress);
+
+// Delete a specific address by ID
+router.delete('/address/:id', shopController.deleteAddress);
+router.get('/address/:id', shopController.getAddressById);
 module.exports = router;
