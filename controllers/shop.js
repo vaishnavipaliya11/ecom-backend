@@ -1,6 +1,6 @@
 const Product = require("../models/product");
 const Address = require("../models/address");
-const Order = require ("../models/order")
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -125,38 +125,76 @@ exports.postCartDeleteProduct = (req, res, next) => {
     });
 };
 
+// exports.postOrder = (req, res, next) => {
+//   let fetchedCart;
+
+//   req.user
+//     .getCart()
+//     .then((cart) => {
+//       fetchedCart = cart;
+//       console.log(cart, "cart");
+//       return cart.getProducts();
+//     })
+//     .then((products) => {
+//       return req.user
+//         .createOrder()
+//         .then((order) => {
+//           return order.addProducts(
+//             products.map((product) => {
+//               product.orderItem = { quantity: product.cartItem.quantity };
+//               console.log(product, "orderproduct");
+//               return product;
+//             })
+//           );
+//         })
+//         .then(() => {
+//           // Now that the products are added to the order, let's send a response
+//           res.status(201).json({ message: 'Order created successfully', products });
+//         })
+//         .catch((err) => console.log(err));
+//     })
+//     .then((result) => {
+//       return fetchedCart.setProducts(null);
+//     })
+//     .then((result) => console.log(result))
+//     .catch((err) => console.log(err));
+// };
+
 exports.postOrder = (req, res, next) => {
   let fetchedCart;
+
   req.user
     .getCart()
     .then((cart) => {
-      if (!cart) {
-        return res.status(400).json({ message: "Cart is empty" });
-      }
       fetchedCart = cart;
+      console.log(cart, "cart");
       return cart.getProducts();
     })
     .then((products) => {
       return req.user
         .createOrder()
         .then((order) => {
-          return order.addProducts(
-            products.map((product) => {
-              product.orderItem = { quantity: product.cartItem.quantity };
-              console.log(product, "PRODUCTTTTT");
-              return product;
+          return order
+            .addProducts(
+              products.map((product) => {
+                product.orderItem = { quantity: product.cartItem.quantity };
+                console.log(product, "orderproduct");
+                return product;
+              })
+            )
+            .then(() => {
+              // Now that the products are added to the order, let's send a response
+              res.status(201).json({ message: "Order created successfully" });
             })
-          );
+            .catch((err) => console.log(err));
         })
         .catch((err) => console.log(err));
     })
     .then((result) => {
       return fetchedCart.setProducts(null);
     })
-    .then((result) => {
-      res.redirect("/orders");
-    })
-    .catch((err) => console.log(err, "ERRORRRR"));
+    .then((result) => console.log(result))
+    .catch((err) => console.log(err));
 };
 
 exports.getOrders = (req, res, next) => {
@@ -167,9 +205,6 @@ exports.getOrders = (req, res, next) => {
       res.send({ orders });
     })
     .catch((err) => console.log(err));
-
-  
-
 };
 
 // Controller function to filter products by multiple categories
