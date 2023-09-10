@@ -106,6 +106,7 @@ sequelize
     // return user.createCart();
   })
   .then(() => {
+    console.log(process.env.PORT,"process.env.PORT");
     app.listen(process.env.PORT || 3000);
   })
 
