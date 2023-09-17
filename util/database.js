@@ -1,9 +1,20 @@
-const Sequelize = require('sequelize');
+const Sequelize = require("sequelize");
+const dotenv= require('dotenv').config();
 
-const sequelize = new Sequelize("store_7bcb", 'store_7bcb_user', 'H4m8i5z9N0S43AURCTRBF4i77MVWcSHo', {
-  dialect: 'mysql',
-  host: 'dpg-cjuq4dnhdsdc73e9m6g0-a',
-  port: '5432',
+const username= process.env.USERNAMEOFDB
+const dbname=process.env.DBNAME
+const password= process.env.PASSWORD
+const host= process.env.HOST
+console.log(username, "username");
+const sequelize = new Sequelize(dbname, username, password, {
+  dialect: "mysql",
+  host: host,
+  dialectOptions: {
+    ssl: {
+      require: true, // Set this to true to require SSL/TLS
+      rejectUnauthorized: false, // You might need to adjust this based on your SSL certificate configuration
+    },
+  },
 });
 
 module.exports = sequelize;

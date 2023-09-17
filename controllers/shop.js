@@ -1,6 +1,7 @@
 const Product = require("../models/product");
 const Address = require("../models/address");
 const Order = require("../models/order");
+const Cart = require('../models/cart'); // Import your Cart model
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -40,10 +41,14 @@ exports.getIndex = (req, res, next) => {
     });
 };
 
+
 exports.getCart = (req, res, next) => {
-  req.user
-    .getCart()
+  Cart.findOne({ where: { userId: req.user.id } }) // Assuming 'userId' is the correct column name in your Cart model
     .then((cart) => {
+      if (!cart) {
+        return res.send({ products: [] });
+      }
+
       return cart
         .getProducts()
         .then((products) => {
@@ -53,6 +58,7 @@ exports.getCart = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
+
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;

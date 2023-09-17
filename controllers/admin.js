@@ -1,8 +1,6 @@
-const Product = require('../models/product');
+const Product = require("../models/product");
 
-exports.getAddProduct = (req, res, next) => {
-  
-};
+exports.getAddProduct = (req, res, next) => {};
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
@@ -10,28 +8,28 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
   const videoUrl = req.body.videoUrl;
-  const category= req.body.category;
-  const highlights= req.body.highlights;
-  const rating= req.body.rating;
-  console.log(req.body.category,"req.body.category");
+  const category = req.body.category;
+  const highlights = req.body.highlights;
+  const rating = req.body.rating;
+  console.log(req.body.category, "req.body.category");
   req.user
     .createProduct({
       title: title,
       price: price,
       imageUrl: imageUrl,
       description: description,
-      videoUrl:videoUrl,
-      category:category,
-      highlights:highlights,
-      rating:rating
+      videoUrl: videoUrl,
+      category: category,
+      highlights: highlights,
+      rating: rating,
     })
-    .then(result => {
-      console.log(result ,"RESULT");
-      
-      console.log('Created Product');
-      res.redirect('/admin/products');
+    .then((result) => {
+      console.log(result, "RESULT");
+
+      console.log("Created Product");
+      res.redirect("/admin/products");
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 };
@@ -39,37 +37,37 @@ exports.postAddProduct = (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
   if (!editMode) {
-    return res.redirect('/');
+    return res.redirect("/");
   }
   const prodId = req.params.productId;
   req.user
     .getProducts({ where: { id: prodId } })
     // Product.findByPk(prodId)
-    .then(products => {
+    .then((products) => {
       const product = products[0];
       if (!product) {
-        return res.redirect('/');
+        return res.redirect("/");
       }
-      
-      console.log(product,"EDITTTT");
-      res.send(product)
+
+      console.log(product, "EDITTTT");
+      res.send(product);
     })
-    .catch(err => console.log(err));
+    .catch((err) => console.log(err));
 };
 
 exports.postEditProduct = (req, res, next) => {
-  console.log(req.body,"edit body");
+  console.log(req.body, "edit body");
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
   const updatedVideoUrl = req.body.videoUrl;
-  const updatedCategory= req.body.category;
-  const updatedHighlights= req.body.highlights;
-  const updatedRating= req.body.rating;
+  const updatedCategory = req.body.category;
+  const updatedHighlights = req.body.highlights;
+  const updatedRating = req.body.rating;
   Product.findByPk(prodId)
-    .then(product => {
+    .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
       }
@@ -77,61 +75,61 @@ exports.postEditProduct = (req, res, next) => {
       product.price = updatedPrice;
       product.description = updatedDesc;
       product.imageUrl = updatedImageUrl;
-      product.videoUrl= updatedVideoUrl;
-      product.rating= updatedRating,
-      product.category= updatedCategory,
-      product.highlights= updatedHighlights
+      product.videoUrl = updatedVideoUrl;
+      (product.rating = updatedRating),
+        (product.category = updatedCategory),
+        (product.highlights = updatedHighlights);
       return product.save();
     })
-    .then(result => {
-      console.log('UPDATED PRODUCT!');
-      res.redirect('/admin/products');
+    .then((result) => {
+      console.log("UPDATED PRODUCT!");
+      res.redirect("/admin/products");
     })
-    .catch(err => console.log(err));
+    .catch((err) => console.log(err));
 };
 
 exports.getProducts = (req, res, next) => {
-  req.user
-    .getProducts()
-    .then(products => {
-      res.send({products})
+  Product.findAll()
+    .then((products) => {
+      res.send({ products });
     })
-    .catch(err => console.log(err));
+    .catch((err) => console.log(err));
 };
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findByPk(prodId)
-    .then(product => {
+    .then((product) => {
       return product.destroy();
     })
-    .then(result => {
-      console.log('DESTROYED PRODUCT');
-      res.redirect('/admin/products');
+    .then((result) => {
+      console.log("DESTROYED PRODUCT");
+      res.redirect("/admin/products");
     })
-    .catch(err => console.log(err));
+    .catch((err) => console.log(err));
 };
 
-
-exports.getFilteredCategory= (req, res, next) => {
+exports.getFilteredCategory = (req, res, next) => {
   const category = req.params.category;
 
-  console.log(req.params.category,"req.params.category");
-  const categoryArray = category.split(',');
+  console.log(req.params.category, "req.params.category");
+  const categoryArray = category.split(",");
   // Use Sequelize's findAll method to filter products by category
   Product.findAll({
     where: {
-      category: categoryArray
-    }
+      category: categoryArray,
+    },
   })
-    .then(products => {
+    .then((products) => {
       res.status(200).json({ products });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
-      res.status(500).json({ error: 'An error occurred while fetching products.' });
+      res
+        .status(500)
+        .json({ error: "An error occurred while fetching products." });
     });
-}
+};
 
 // exports.getFilteredCategory = (req, res, next) => {
 //   // Get the categories from the query parameters
