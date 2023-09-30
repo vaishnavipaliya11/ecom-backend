@@ -8,7 +8,6 @@ const isAuth = require('../util/is-auth')
 const router = express.Router();
 
 router.get('/product/:id', shopController.getSingleProduct);
-router.get('/abcd', shopController.getProducts);
 
 router.get('/', isAuth, shopController.getIndex);
 
@@ -22,17 +21,17 @@ router.post('/cart', isAuth, shopController.postCart);
 
 router.post('/cart-delete-item', isAuth, shopController.postCartDeleteProduct);
 
-router.post('/create-order', isAuth, shopController.postOrder);
+// router.post('/create-order', isAuth, shopController.postOrder);
 
-router.get('/orders', isAuth, shopController.getOrders);
+// router.get('/orders', isAuth, shopController.getOrders);
 
-router.get('/wishlist', isAuth, shopController.getWishlist);
+// router.get('/wishlist', isAuth, shopController.getWishlist);
 
-router.post('/add-wishlist', isAuth, shopController.postWishlist);
-router.post('/delete-wishlist', isAuth, shopController.wishlistDeleteProduct);
+// router.post('/add-wishlist', isAuth, shopController.postWishlist);
+// router.post('/delete-wishlist', isAuth, shopController.wishlistDeleteProduct);
 
-router.get('/address', isAuth, shopController.getAllAddresses);
-router.post('/add-address', isAuth, shopController.createAddress);
+// router.get('/address', isAuth, shopController.getAllAddresses);
+// router.post('/add-address', isAuth, shopController.createAddress);
 
 // Get a specific address by ID
 // router.get('/address/:id', shopController.getAddressById);
