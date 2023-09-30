@@ -30,15 +30,7 @@ exports.getProduct = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
-exports.getIndex = (req, res, next) => {
-  Product.findAll()
-    .then((products) => {
-      res.send({ products });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
+
 
 exports.getCart = (req, res, next) => {
   Cart.findOne({ where: { userId: req.user.id } })
@@ -160,73 +152,4 @@ exports.postCartDeleteProduct = (req, res, next) => {
       res.status(500).json({ error: 'Something went wrong' });
     });
 };
-
-
-// exports.postCartDeleteProduct = (req, res, next) => {
-//   const prodId = req.body.productId;
-//   req.user
-//     .getCart()
-//     .then((cart) => {
-//       return cart.getProducts({ where: { id: prodId } });
-//     })
-//     .then((products) => {
-//       const product = products[0];
-//       const cartItem = product?.cartItem;
-//       if (!cartItem) {
-//         throw new Error("Product not found in cart");
-//       }
-
-//       // Check the quantity
-//       if (cartItem.quantity > 1) {
-//         // If quantity is greater than 1, decrement it by 1
-//         return cartItem.decrement("quantity", { by: 1 });
-//       } else {
-//         // If quantity is 1 or less, remove the product from the cart
-//         return cartItem.destroy();
-//       }
-//     })
-//     .then((result) => {
-//       res.send({ message: "Quantity decreased by 1" });
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       res.status(500).send({ error: "Something went wrong" });
-//     });
-// };
-
-// exports.postOrder = (req, res, next) => {
-//   let fetchedCart;
-
-//   req.user
-//     .getCart()
-//     .then((cart) => {
-//       fetchedCart = cart;
-//       console.log(cart, "cart");
-//       return cart.getProducts();
-//     })
-//     .then((products) => {
-//       return req.user
-//         .createOrder()
-//         .then((order) => {
-//           return order.addProducts(
-//             products.map((product) => {
-//               product.orderItem = { quantity: product.cartItem.quantity };
-//               console.log(product, "orderproduct");
-//               return product;
-//             })
-//           );
-//         })
-//         .then(() => {
-//           // Now that the products are added to the order, let's send a response
-//           res.status(201).json({ message: 'Order created successfully', products });
-//         })
-//         .catch((err) => console.log(err));
-//     })
-//     .then((result) => {
-//       return fetchedCart.setProducts(null);
-//     })
-//     .then((result) => console.log(result))
-//     .catch((err) => console.log(err));
-// };
-
 

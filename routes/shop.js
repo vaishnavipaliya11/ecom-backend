@@ -7,10 +7,6 @@ const isAuth = require('../util/is-auth')
 
 const router = express.Router();
 
-router.get('/product/:id', shopController.getSingleProduct);
-
-router.get('/', isAuth, shopController.getIndex);
-
 router.get('/products', shopController.getProducts);
 
 router.get('/products/:productId', shopController.getProduct);
