@@ -37,9 +37,9 @@ router.post('/cart-delete-item', isAuth, shopController.postCartDeleteProduct);
 // router.get('/address/:id', shopController.getAddressById);
 
 // Update a specific address by ID
-router.put('/address/:id', shopController.updateAddress);
+// router.put('/address/:id', shopController.updateAddress);
 
-// Delete a specific address by ID
-router.delete('/address/:id', shopController.deleteAddress);
-router.get('/address/:id', shopController.getAddressById);
+// // Delete a specific address by ID
+// router.delete('/address/:id', shopController.deleteAddress);
+// router.get('/address/:id', shopController.getAddressById);
 module.exports = router;
